@@ -1,9 +1,9 @@
 // App.tsx
 import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
+import { useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { useKeepAwake } from "expo-keep-awake";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -129,7 +129,7 @@ function morseToText(code: string) {
 }
 
 // ====== Tempo / Tokens ======
-const unitFromWPM = (wpm: number) => 1200 / wpm; // ms
+const unitFromWPM = (wpm: number) => 2000 / wpm; // ms
 type Token = { on: number; off: number } | { gap: number };
 
 const seqToTokens = (seq: string): Token[] => {
@@ -150,8 +150,8 @@ export default function App() {
   const [plain, setPlain] = useState("");
   const [morse, setMorse] = useState("");
   const [wpm, setWpm] = useState(18);
-  const [freq, setFreq] = useState(600); // placeholder p/ futuro áudio
-  const [vol, setVol] = useState(0.3); // placeholder p/ futuro áudio
+  const [freq, setFreq] = useState(600); // placeholder p/ futuro áudio gerado por síntese
+  const [vol, setVol] = useState(0.3);
 
   // LED de saída (player) e LED da “chave”
   const [ledOut, setLedOut] = useState(false);
@@ -173,33 +173,24 @@ export default function App() {
   const playingRef = useRef(false);
   const abortRef = useRef(false);
 
-  // ====== Áudio via samples (opcional) ======
-  const dotSound = useRef<Audio.Sound | null>(null);
-  const dashSound = useRef<Audio.Sound | null>(null);
+  // ====== Players de áudio (expo-audio) ======
+  // Caminhos partindo de app/(tabs)/index.tsx -> ../../assets
+  const playerDot = useAudioPlayer(require("../../assets/dot.wav"));
+  const playerDash = useAudioPlayer(require("../../assets/dash.wav"));
 
-  useEffect(() => {
-    (async () => {
-      try {
-        // Se tiver os arquivos, descomente e coloque em ./assets:
-        // dotSound.current = new Audio.Sound();
-        // dashSound.current = new Audio.Sound();
-        // await dotSound.current.loadAsync(require("./assets/dot.wav"));
-        // await dashSound.current.loadAsync(require("./assets/dash.wav"));
-      } catch {}
-    })();
-    return () => {
-      dotSound.current?.unloadAsync();
-      dashSound.current?.unloadAsync();
-    };
-  }, []);
-
+  // ====== Helpers ======
   async function tone(on: boolean, isDash?: boolean) {
     setLedOut(on);
-    if (on) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      // if (isDash) await dashSound.current?.replayAsync();
-      // else await dotSound.current?.replayAsync();
-    }
+    if (!on) return;
+
+    // haptics opcional
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // reinicia e toca o sample correto
+    const p = isDash ? playerDash : playerDot;
+    // alguns players ainda podem estar inicializando; usa optional chaining
+    p?.seekTo?.(0);
+    p?.play?.();
   }
 
   function stopPlayback() {
@@ -282,7 +273,7 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1020", top: 50}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1020", top: 50 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -296,7 +287,6 @@ export default function App() {
           {/* Conteúdo */}
           <Text style={s.h1}>Telégrafo em Código Morse</Text>
           <Text style={s.h1}>By: Patriky Brito</Text>
-
 
           {/* Conversor */}
           <View style={s.card}>
@@ -433,11 +423,8 @@ function waitMs(ms: number) {
 }
 
 const s = StyleSheet.create({
-  // antes era "container"; agora o ScrollView usa este content container
   scroll: { padding: 12, paddingBottom: 24, backgroundColor: "#0b1020" },
-
   h1: { color: "#e9eefc", fontSize: 20, fontWeight: "800", marginBottom: 12 },
-
   card: {
     backgroundColor: "#121a33",
     borderColor: "#243058",
@@ -451,7 +438,7 @@ const s = StyleSheet.create({
   textarea: {
     minHeight: 84,
     backgroundColor: "#fff",
-    color: "#e9eefc",
+    color: "#000",
     borderColor: "#1f2a53",
     borderWidth: 1,
     borderRadius: 14,
