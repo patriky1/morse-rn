@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Morse APP",
-    "slug": "Morse APP",
+    "slug": "morse-rn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,12 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.patrikybrito.MorseAPP"
     },
     "web": {
       "bundler": "metro",
@@ -44,6 +49,7 @@
       "eas": {
         "projectId": "5ea8340c-4864-4221-a6bc-e5cb6229b40c"
       }
-    }
+    },
+    "owner": "patrikybrito"
   }
 }
