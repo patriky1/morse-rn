@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.patrikybrito.MorseAPP"
     },
     "android": {
       "adaptiveIcon": {
@@ -44,12 +45,12 @@
     "experiments": {
       "typedRoutes": true
     },
+    "owner": "patrikybrito",
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "5ea8340c-4864-4221-a6bc-e5cb6229b40c"
+        "projectId": "c604fb61-c7a2-4399-9055-0ec51dd60b99"
       }
-    },
-    "owner": "patrikybrito"
+    }
   }
 }
