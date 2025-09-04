@@ -37,7 +37,12 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Codigos',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol
+                    size={30}
+                    color="#808080"
+                    name="chevron.left.forwardslash.chevron.right"
+                    
+                  />,
         }}
       />
     </Tabs>

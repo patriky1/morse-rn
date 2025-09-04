@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "morse-rn",
-    "slug": "morse-rn",
+    "name": "Morse APP",
+    "slug": "Morse APP",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

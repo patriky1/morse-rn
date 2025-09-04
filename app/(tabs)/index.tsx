@@ -1,9 +1,10 @@
-// App.tsx
+// app/(tabs)/index.tsx
 import Slider from "@react-native-community/slider";
 import { useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
+
 import { useKeepAwake } from "expo-keep-awake";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -16,69 +17,7 @@ import {
   View,
 } from "react-native";
 
-// ====== Dados: MAP/REVERSE ======
-const MAP: Record<string, string> = {
-  A: ".-",
-  B: "-...",
-  C: "-.-.",
-  D: "-..",
-  E: ".",
-  F: "..-.",
-  G: "--.",
-  H: "....",
-  I: "..",
-  J: ".---",
-  K: "-.-",
-  L: ".-..",
-  M: "--",
-  N: "-.",
-  O: "---",
-  P: ".--.",
-  Q: "--.-",
-  R: ".-.",
-  S: "...",
-  T: "-",
-  U: "..-",
-  V: "...-",
-  W: ".--",
-  X: "-..-",
-  Y: "-.--",
-  Z: "--..",
-  "0": "-----",
-  "1": ".----",
-  "2": "..---",
-  "3": "...--",
-  "4": "....-",
-  "5": ".....",
-  "6": "-....",
-  "7": "--...",
-  "8": "---..",
-  "9": "----.",
-  ".": ".-.-.-",
-  ",": "--..--",
-  "?": "..--..",
-  "'": ".----.",
-  "!": "-.-.--",
-  "/": "-..-.",
-  "(": "-.--.",
-  ")": "-.--.-",
-  "&": ".-...",
-  ":": "---...",
-  ";": "-.-.-.",
-  "=": "-...-",
-  "+": ".-.-.",
-  "-": "-....-",
-  _: "..--.-",
-  '"': ".-..-.",
-  $: "...-..-",
-  "@": ".--.-.",
-  Á: ".--.-",
-  Ä: ".-.-",
-  É: "..-..",
-  Ñ: "--.--",
-  Ö: "---.",
-  Ü: "..--",
-};
+import { MORSE_MAP as MAP } from "@/lib/morse";
 
 const REVERSE: Record<string, string> = Object.fromEntries(
   Object.entries(MAP).map(([k, v]) => [v, k])
@@ -122,7 +61,7 @@ function morseToText(code: string) {
       w
         .trim()
         .split(/\s+/)
-        .map((seq) => REVERSE[seq] || "�")
+        .map((seq) => REVERSE[seq] || " ")
         .join("")
     )
     .join(" ");
@@ -130,6 +69,7 @@ function morseToText(code: string) {
 
 // ====== Tempo / Tokens ======
 const unitFromWPM = (wpm: number) => 2000 / wpm; // ms
+
 type Token = { on: number; off: number } | { gap: number };
 
 const seqToTokens = (seq: string): Token[] => {
@@ -166,8 +106,8 @@ export default function App() {
   );
 
   // Timers de detecção de letra/palavra
-  const letterTimer = useRef<NodeJS.Timeout | null>(null);
-  const wordTimer = useRef<NodeJS.Timeout | null>(null);
+  const letterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wordTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const keyDownAt = useRef<number>(0);
   const playingRef = useRef(false);
@@ -177,6 +117,15 @@ export default function App() {
   // Caminhos partindo de app/(tabs)/index.tsx -> ../../assets
   const playerDot = useAudioPlayer(require("../../assets/dot.wav"));
   const playerDash = useAudioPlayer(require("../../assets/dash.wav"));
+
+  // ====== Lifecycle cleanup ======
+  useEffect(() => {
+    return () => {
+      abortRef.current = true;
+      if (letterTimer.current) clearTimeout(letterTimer.current);
+      if (wordTimer.current) clearTimeout(wordTimer.current);
+    };
+  }, []);
 
   // ====== Helpers ======
   async function tone(on: boolean, isDash?: boolean) {
@@ -188,7 +137,6 @@ export default function App() {
 
     // reinicia e toca o sample correto
     const p = isDash ? playerDash : playerDot;
-    // alguns players ainda podem estar inicializando; usa optional chaining
     p?.seekTo?.(0);
     p?.play?.();
   }
@@ -246,7 +194,7 @@ export default function App() {
     setKeyState("Solto");
     const press = Date.now() - keyDownAt.current;
     const u = unitFromWPM(wpm);
-    const dotDashThreshold = 2.2 * u; // mesmo default do web
+    const dotDashThreshold = 2.2 * u;
     const symbol = press < dotDashThreshold ? "." : "-";
     setCaptureSeq((prev) => prev + symbol);
     scheduleGapDetection();
@@ -286,7 +234,7 @@ export default function App() {
         >
           {/* Conteúdo */}
           <Text style={s.h1}>Telégrafo em Código Morse</Text>
-          <Text style={s.h1}>By: Patriky Brito</Text>
+          <Text style={s.h2}>By: Patriky Brito</Text>
 
           {/* Conversor */}
           <View style={s.card}>
@@ -337,7 +285,7 @@ export default function App() {
                 style={s.button}
                 onPress={() => playSeq(morse || textToMorse(plain))}
               >
-                <Text style={s.buttonText}>▶ Reproduzir (LED/Haptics)</Text>
+                <Text style={s.buttonText}>▶ Reproduzir (LED/SOM)</Text>
               </Pressable>
               <Pressable style={s.button} onPress={stopPlayback}>
                 <Text style={s.buttonText}>⏹ Parar</Text>
@@ -424,7 +372,21 @@ function waitMs(ms: number) {
 
 const s = StyleSheet.create({
   scroll: { padding: 12, paddingBottom: 24, backgroundColor: "#0b1020" },
-  h1: { color: "#e9eefc", fontSize: 20, fontWeight: "800", marginBottom: 12 },
+  h1: {
+    color: "#e9eefc",
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  h2: {
+    color: "#e9eefc",
+    fontSize: 15,
+    fontWeight: "400",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+
   card: {
     backgroundColor: "#121a33",
     borderColor: "#243058",
