@@ -8,14 +8,20 @@
     "scheme": "morsern",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    
+    
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.patrikybrito.MorseAPP"
     },
+    
     "android": {
+       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+       
+
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
@@ -49,7 +55,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "c604fb61-c7a2-4399-9055-0ec51dd60b99"
+        "projectId": "171ef2e0-3ffe-4c51-9448-fa1c91830fea"
       }
     }
   }
