@@ -1,0 +1,35 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    google()
+  }
+
+  // RN 0.81.x: plugin escopado
+  def rnPluginDir = file("../node_modules/@react-native/gradle-plugin")
+
+  // Fallbacks (outras árvores possíveis)
+  if (!rnPluginDir.exists()) {
+    rnPluginDir = file("../node_modules/react-native-gradle-plugin")
+  }
+  if (!rnPluginDir.exists()) {
+    rnPluginDir = file("../node_modules/react-native/packages/react-native-gradle-plugin")
+  }
+
+  if (rnPluginDir.exists()) {
+    includeBuild(rnPluginDir)
+  } else {
+    println("WARN: plugin do RN não encontrado em @react-native/gradle-plugin nem nos caminhos antigos")
+  }
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+  repositories {
+    google()
+    mavenCentral()
+  }
+}
+
+rootProject.name = "android"
+include(":app")
