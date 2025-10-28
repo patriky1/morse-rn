@@ -16,8 +16,17 @@
     },
     "release": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "release": {
+        "workflow": "bare"
       }
+
+      },
+      "ios": {
+      "release": {
+        "workflow": "bare"
+      }
+    }
     }
   },
   "submit": {

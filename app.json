@@ -8,14 +8,20 @@
     "scheme": "morsern",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    
+    
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.patrikybrito.MorseAPP"
     },
+    
     "android": {
+       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+       
+
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
